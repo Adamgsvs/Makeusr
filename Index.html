@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Username Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1e1e2f;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #292b3a;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        button {
+            background-color: #5865f2;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: #4752c4;
+        }
+
+        .results, .favorites {
+            background-color: #1e1e2f;
+            padding: 15px;
+            border-radius: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #3b3d4e;
+            margin-top: 10px;
+            text-align: left;
+        }
+
+        .results div, .favorites div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 5px 0;
+            font-size: 16px;
+        }
+
+        .copy-btn, .star-btn {
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+            transition: 0.3s;
+        }
+
+        .copy-btn {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .copy-btn:hover {
+            background-color: #45a049;
+        }
+
+        .star-btn {
+            background-color: #fbc02d;
+            color: black;
+        }
+
+        .star-btn:hover {
+            background-color: #ffa000;
+        }
+
+        h2 {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Discord Username Generator</h1>
+        <p>اختر عدد اليوزرات لتوليدها:</p>
+        <input type="number" id="username-count" placeholder="عدد اليوزرات" min="1" max="100">
+        <button id="generate-btn">توليد</button>
+        <div class="results" id="results"></div>
+    </div>
+
+    <div class="container">
+        <h2>المفضلة</h2>
+        <div class="favorites" id="favorites"></div>
+    </div>
+
+    <script>
+        const usedUsernames = new Set(); // لتخزين اليوزرات الفريدة
+        const favoriteUsernames = new Set(); // لتخزين اليوزرات المميزة
+
+        function generateRandomUsername(length) {
+            const letters = 'abcdefghijklmnopqrstuvwxyz';
+            const digits = '0123456789';
+            let username = '';
+
+            // أضف رقمًا عشوائيًا في مكان عشوائي
+            const randomIndexForNumber = Math.floor(Math.random() * length);
+            for (let i = 0; i < length; i++) {
+                if (i === randomIndexForNumber) {
+                    username += digits[Math.floor(Math.random() * digits.length)];
+                } else {
+                    username += letters[Math.floor(Math.random() * letters.length)];
+                }
+            }
+            return username;
+        }
+
+        function getUniqueUsername(length) {
+            let username;
+            do {
+                username = generateRandomUsername(length);
+            } while (usedUsernames.has(username)); // استمر بالتوليد إذا كان الاسم موجودًا
+            usedUsernames.add(username); // أضف الاسم إلى القائمة الفريدة
+            return username;
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert(`تم نسخ ${text} إلى الحافظة!`);
+            }).catch(err => {
+                alert('تعذر النسخ إلى الحافظة.');
+            });
+        }
+
+        function addToFavorites(username) {
+            if (!favoriteUsernames.has(username)) {
+                favoriteUsernames.add(username);
+
+                // إضافة إلى قائمة المفضلة
+                const favoritesDiv = document.getElementById('favorites');
+                const favoriteItem = document.createElement('div');
+                favoriteItem.textContent = username;
+                favoritesDiv.appendChild(favoriteItem);
+            } else {
+                alert('هذا اليوزر موجود بالفعل في المفضلة!');
+            }
+        }
+
+        document.getElementById('generate-btn').addEventListener('click', () => {
+            const count = parseInt(document.getElementById('username-count').value, 10);
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+
+            if (isNaN(count) || count < 1 || count > 100) {
+                alert('يرجى إدخال عدد بين 1 و 100');
+                return;
+            }
+
+            for (let i = 0; i < count; i++) {
+                const usernameLength = Math.random() < 0.5 ? 3 : 4; // طول الاسم عشوائي (3 أو 4 أحرف)
+                const username = getUniqueUsername(usernameLength); // الحصول على اسم فريد
+
+                // إنشاء عنصر النتيجة
+                const usernameElement = document.createElement('div');
+                usernameElement.textContent = username;
+
+                // زر النسخ
+                const copyButton = document.createElement('button');
+                copyButton.textContent = 'نسخ';
+                copyButton.className = 'copy-btn';
+                copyButton.addEventListener('click', () => copyToClipboard(username));
+
+                // زر النجمة
+                const starButton = document.createElement('button');
+                starButton.textContent = '⭐';
+                starButton.className = 'star-btn';
+                starButton.addEventListener('click', () => addToFavorites(username));
+
+                // إضافة الاسم والأزرار إلى النتيجة
+                usernameElement.appendChild(copyButton);
+                usernameElement.appendChild(starButton);
+                resultsDiv.appendChild(usernameElement);
+            }
+        });
+    </script>
+</body>
+</html>
